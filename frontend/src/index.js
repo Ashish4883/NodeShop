@@ -14,6 +14,7 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import HomeScreen from "./screens/HomeScreen";
 import ProductScreen from "./screens/ProductScreen";
+import CartScreen from "./screens/CartScreen";
 // import "bootstrap/dist/css/bootstrap.min.css";
 
 const router = createBrowserRouter(
@@ -25,6 +26,7 @@ const router = createBrowserRouter(
         path="/product/:id"
         element={<ProductScreen />}
       ></Route>
+      <Route path="/cart" element={<CartScreen />} />
     </Route>
   )
 );
