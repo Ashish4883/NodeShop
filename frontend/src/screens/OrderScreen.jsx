@@ -39,8 +39,6 @@ const OrderScreen = () => {
     error: errorPayPal,
   } = useGetPaypalClientIdQuery();
 
-  const [exchangeRate, setExchangeRate] = useState(null);
-
   useEffect(() => {
     if (!errorPayPal && !loadingPayPal && paypal.clientId) {
       const loadPaypalScript = async () => {
@@ -59,25 +57,11 @@ const OrderScreen = () => {
         }
       }
     }
-    const fetchExchangeRate = async () => {
-      try {
-        const response = await axios.get(
-          "https://api.exchangerate-api.com/v4/latest/USD"
-        );
-
-        setExchangeRate(response.data.rates.INR);
-      } catch (error) {
-        console.error("Error fetching exchange rate:", error);
-      }
-    };
-
-    fetchExchangeRate();
   }, [errorPayPal, loadingPayPal, order, paypal, paypalDispatch]);
 
   function onApprove(data, actions) {
     return actions.order.capture().then(async function (details) {
       try {
-        details.exchangeRate = exchangeRate;
         await payOrder({ orderId, details }).unwrap();
         refetch();
         toast.success("Order is paid");
@@ -99,16 +83,11 @@ const OrderScreen = () => {
   }
 
   function createOrder(data, actions) {
-    if (exchangeRate === null) {
-      throw new Error("Error fetching exchange rate");
-    }
-
-    const amountInUSD = order.totalPrice / exchangeRate;
     return actions.order
       .create({
         purchase_units: [
           {
-            amount: { value: amountInUSD.toFixed(2) },
+            amount: { value: order.totalPrice.toFixed(2) },
           },
         ],
       })
@@ -197,7 +176,7 @@ const OrderScreen = () => {
                           </Link>
                         </Col>
                         <Col md={4}>
-                          {item.qty} x ₹{item.price} = ₹{item.qty * item.price}
+                          {item.qty} x ${item.price} = ${item.qty * item.price}
                         </Col>
                       </Row>
                     </ListGroup.Item>
@@ -216,25 +195,25 @@ const OrderScreen = () => {
               <ListGroup.Item>
                 <Row>
                   <Col>Items</Col>
-                  <Col>₹{order.itemsPrice}</Col>
+                  <Col>${order.itemsPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
                   <Col>Shipping</Col>
-                  <Col>₹{order.shippingPrice}</Col>
+                  <Col>${order.shippingPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
                   <Col>Tax</Col>
-                  <Col>₹{order.taxPrice}</Col>
+                  <Col>${order.taxPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
                   <Col>Total</Col>
-                  <Col>₹{order.totalPrice}</Col>
+                  <Col>${order.totalPrice}</Col>
                 </Row>
               </ListGroup.Item>
               {!order.isPaid && (
