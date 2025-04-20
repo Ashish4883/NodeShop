@@ -22,6 +22,12 @@ app.use(express.urlencoded({ extended: true }));
 //Cookkie parser middleware
 app.use(cookieParser());
 
+// Middleware to disable caching for all routes
+app.use((req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store');
+    next();
+});
+
 app.get("/api/config/paypal", (req, res) =>
   res.send({ clientId: process.env.PAYPAL_CLIENT_ID })
 );
